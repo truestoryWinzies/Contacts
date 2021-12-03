@@ -5,35 +5,29 @@ import java.util.List;
 import java.util.Scanner;
 
 public class PhoneBook {
-    private List<Contact> phoneBook;
+    private List<BaseContact> phoneBook;
     private static final Scanner sc = new Scanner(System.in);
+    private ContactFactory contactFactory;
 
     public PhoneBook() {
         this.phoneBook = new ArrayList<>();
+        this.contactFactory = new ContactFactory();
     }
 
-    public void addRecord () {
-        System.out.println("Enter the name: ");
-        String name = sc.nextLine();
-        System.out.println("Enter the surname: ");
-        String surname = sc.nextLine();
-        System.out.println("Enter the number: ");
-        String phoneNumber = sc.nextLine();
+    public void createRecord () {
+        System.out.print("Enter the type (person, organization)");
+        String type = sc.nextLine();
+        BaseContact contact = contactFactory.createContact(type);
 
-        Contact contact = new Contact.ContactBuilder()
-                .setName(name)
-                .setLastName(surname)
-                .setPhoneNumber(phoneNumber)
-                .build();
-
-        if (contact == null) {
-            System.out.println("Wrong number format!");
-        } else if (phoneBook.add(contact)) {
-            System.out.println("The record added.");
-        }
+            if (contact == null) {
+                System.out.println("Wrong number format!");
+            } else if (phoneBook.add(contact)) {
+                System.out.println("The record added.");
+            }
+//        }
     }
 
-    public List<Contact> getPhoneBook() {
+    public List<BaseContact> getPhoneBook() {
         return phoneBook;
     }
 
@@ -59,7 +53,7 @@ public class PhoneBook {
         }
     }
 
-    public void editContact () {
+    public void editRecord () {
         if(phoneBook.isEmpty()) {
             System.out.println("No records to edit!");
         } else {
@@ -67,44 +61,12 @@ public class PhoneBook {
 
             System.out.println("Select a record: ");
             int index = sc.nextInt() - 1;
-            sc.nextLine();
 
-            Contact tempContact = getContact(index);
-            Contact updatedContact;
+            BaseContact editableContact = phoneBook.get(index);
+            BaseContact updatedContact = contactFactory.editContact(editableContact);
+            phoneBook.set(index, updatedContact);
 
-            System.out.println("Select a field (name, surname, number): ");
-            String field = sc.nextLine();
-
-            String newName = "";
-            String newLastName = "";
-            String newPhoneNum = "";
-
-            switch (field) {
-                case "name":
-                    System.out.println("Enter name: ");
-                    newName = sc.nextLine();
-                    updatedContact = new Contact.ContactBuilder(tempContact).setName(newName).build();
-                    phoneBook.set(index, updatedContact);
-                    break;
-                case "surname":
-                    System.out.println("Enter surname: ");
-                    newLastName = sc.nextLine();
-                    updatedContact = new Contact.ContactBuilder(tempContact).setLastName(newLastName).build();
-                    phoneBook.set(index, updatedContact);
-                    break;
-                case "number":
-                    System.out.println("Enter number: ");
-                    newPhoneNum = sc.nextLine();
-                    updatedContact = new Contact.ContactBuilder(tempContact).setPhoneNumber(newPhoneNum).build();
-                    phoneBook.set(index, updatedContact);
-                    break;
-                default:
-                    System.out.println("Incorrect field");
-
-            }
         }
-
-
 
     }
 
@@ -113,15 +75,25 @@ public class PhoneBook {
     }
 
 
-    public Contact getContact (int contactId)  {
-            Contact contact = phoneBook.get(contactId);
+    public BaseContact getContact (int contactId)  {
+            BaseContact contact = phoneBook.get(contactId);
             return contact;
     }
 
     public void listContacts() {
-        for (Contact contact : phoneBook) {
+        for (BaseContact contact : phoneBook) {
             System.out.println(contact.toString());
         }
+    }
+
+    public void getContactInfo() {
+        getRecords();
+        System.out.println("Select a record: ");
+        int contactId = sc.nextInt() - 1;
+
+        BaseContact contact = phoneBook.get(contactId);
+        contact.getInfo();
+
     }
 
 
